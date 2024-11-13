@@ -1,6 +1,8 @@
 import { useContext } from "react"
 import { AuthContext } from "../../contexts/auth"
 
+import Sidebar from "../../components/Sidebar";
+
 export default function Dashboard() {
   const { logOut } = useContext(AuthContext);
 
@@ -10,8 +12,10 @@ export default function Dashboard() {
 
   return(
     <div>
-      <h1>dash</h1>
 
+      <Sidebar />
+
+      <h1>dash</h1>
       <button onClick={handleLogOut}>Sair</button>
     </div>
   )
