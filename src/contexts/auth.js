@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from "react";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc  } from "firebase/firestore";
 
 import { auth, db } from '../services/firebaseConnection';
@@ -99,6 +99,12 @@ function AuthProvider({ children }) {
   function storageUser(data) {
     localStorage.setItem('@ticketsPRO', JSON.stringify(data));
   }
+
+  async function logOut() {
+    await signOut(auth);
+    localStorage.removeItem('@ticketsPRO');
+    setUser(null);
+  }
   
   return(
     <AuthContext.Provider 
@@ -107,8 +113,9 @@ function AuthProvider({ children }) {
         user,
         signIn,
         signUp,
+        logOut,
         loading,
-        loadingAuth
+        loadingAuth,
       }}
     >
       {children}
