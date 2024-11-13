@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc  } from "firebase/firestore";
 
 import { auth, db } from '../services/firebaseConnection';
@@ -13,10 +13,34 @@ function AuthProvider({ children }) {
   const [loadingAuth, setLoadingAuth] = useState(false);
   const navigate = useNavigate();
 
-  function signIn(email, password) {
-    console.log(email);
-    console.log(password);
-    alert('logado')
+  async function signIn(email, password) {
+    setLoadingAuth(true);
+
+    await signInWithEmailAndPassword(auth, email, password)
+    .then( async (value) => {
+      let uid = value.user.uid;
+
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+
+      let data = {
+        uid: uid,
+        name: docSnap.data().name,
+        email: value.user.email,
+        avatarUrl: docSnap.data().avatarUrl
+      }
+
+      setUser(data);
+      storageUser(data);
+      setLoadingAuth(false);
+      toast.success("Bem-vindo(a) de volta!");
+      navigate("/dashboard")
+    })
+    .catch((error) => {
+      console.log(error);
+      setLoadingAuth(false);
+      toast.error("Ops algo deu errado!");
+    })
   }
 
   async function signUp(email, password, name) {
