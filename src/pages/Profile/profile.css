@@ -57,7 +57,8 @@
 }
 
 .form-profile button {
-  max-width: 600px;
+  max-width: 150px;
+  margin-top: 0.5em;
 }
 
 .logout-btn {

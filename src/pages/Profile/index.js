@@ -9,9 +9,28 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/auth";
 
 export default function Profile() {
-  const { user } = useContext(AuthContext);
+  const { user, setUser, storageUser, logOut } = useContext(AuthContext);
 
   const [avatarUrl, setAvatarUrl] = useState(user && user.avatarUrl);
+  const [imageAvatar, setImageAvatar] = useState(null);
+
+  const [name, setName] = useState(user && user.name);
+  const [email, setEmail] = useState(user && user.email);
+
+  function handleFile(e) {
+    const image = e.target.files[0];
+    
+    if(image) {
+      if(image.type === 'image/jpeg' || image.type === 'image/png') {
+        setImageAvatar(image);
+        setAvatarUrl(URL.createObjectURL(image));
+      } else {
+        alert("Envie uma imagem do tipo PNG ou JPEG")
+        setImageAvatar(null);
+        return;
+      }
+    }
+  }
 
   return(
     <div>
@@ -30,7 +49,7 @@ export default function Profile() {
                 <FiUpload color="#FFF" size={25} />
               </span>
 
-              <input type="file" accept="image/*" /> <br/>
+              <input type="file" accept="image/*" onChange={handleFile} /> <br/>
               {avatarUrl === null ? (
                 <img src={avatar} alt="Foto de Perfil" width={250} height={250} />
               ) : (
@@ -39,10 +58,10 @@ export default function Profile() {
             </label>
 
             <label>Nome</label>
-            <input type="text" placeholder="Seu Nome" />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
             
             <label>Email</label>
-            <input type="text" placeholder="test@test.com" disabled={true} />
+            <input type="text" value={email} disabled={true} />
 
             <button type="submit">Salvar</button>
 
@@ -51,7 +70,7 @@ export default function Profile() {
         </div>
 
         <div className="container">
-          <button className="logout-btn"> Sair</button>
+          <button className="logout-btn" onClick={ () => logOut() }> Sair</button>
         </div>
 
       </div>
