@@ -46,7 +46,9 @@ export default function Dashboard() {
               <tr>
                 <td data-label="Cliente">Empresa Teste</td>
                 <td data-label="Assunto">Suporte</td>
-                <td data-label="Status">Em Aberto</td>
+                <td data-label="Status">
+                  <span className="badge" style={{ backgroundColor: '#999' }}>Em Aberto</span>
+                </td>
                 <td data-label="Cadastrado">12/11/2024</td>
                 <td data-label="#">
                   <button className="action" style={{ backgroundColor: "#3583F6" }}>
