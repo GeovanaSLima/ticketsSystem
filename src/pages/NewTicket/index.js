@@ -4,17 +4,71 @@ import Sidebar from '../../components/Sidebar';
 import './newTicket.css';
 
 import { FiPlusCircle } from 'react-icons/fi';
-import { useState } from 'react';
+import { AuthContext } from '../../contexts/auth';
+import { useContext, useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../services/firebaseConnection';
+
+
+const listRef = collection(db, "customers");
+
 
 export default function NewTicket() {
-  const [customer, setCustomer] = useState([]);
+  const { user } = useContext(AuthContext);
+  
+  const [customers, setCustomers] = useState([]);
+  const [customerSelected, setCustomerSelected] = useState(0);
+  const [loadCustomer, setLoadingCustomer] = useState(true);
 
   const [mensagem, setMensagem] = useState("");
   const [assunto, setAssunto] = useState("Suporte");
   const [status, setStatus] = useState("Aberto");
 
+  useEffect(() => {
+    async function loadCustomer() {
+      const querySnapshot = await getDocs(listRef)
+      .then( (snapshot) => {
+        let lista = [];
+
+        snapshot.forEach((doc) => {
+          lista.push({
+            id: doc.id,
+            nomeFantasia: doc.data().nomeFantasia
+          })
+        })
+
+        if (snapshot.docs.size === 0) {
+          console.log("NENHUMA EMPRESA ENCONTRADA");
+          setCustomers([ { id: "'", nomeFantasia: "Freela" } ])
+          setLoadingCustomer(false);
+          return;
+        } 
+
+        setCustomers(lista);
+        setLoadingCustomer(false);
+
+        console.log(lista);
+      })
+      .catch((error) => {
+        console.log("Erro ao buscar os clientes", error)
+        setLoadingCustomer(false);
+        setCustomers([ { id: "'", nomeFantasia: "Freela" } ])
+      })
+    }
+
+    loadCustomer();
+  }, [])
+
   function handleOptionChange(e) {
     setStatus(e.target.value);
+  }
+
+  function handleChangeSelect(e) {
+    setAssunto(e.target.value);
+  }
+
+  function handleCustomerChange(e) {
+    setCustomerSelected(e.target.value);
   }
 
 
@@ -31,13 +85,24 @@ export default function NewTicket() {
           <form action="" className="form-profile">
             
             <label>Clientes</label>
-            <select>
-              <option key={1} value={1}>Mercado Teste</option>
-              <option key={2} value={2}>Info</option>
-            </select>
+            {
+              loadCustomer ? (
+                <input type="text" disabled={true} value="Carregando..." />
+              ) : (
+                <select value={customerSelected} onChange={handleCustomerChange}>
+                  {customers.map((item, index) => {
+                    return(
+                      <option key={index} value={index}>
+                        {item.nomeFantasia}
+                      </option>
+                    )
+                  })}
+                </select>
+              )
+            }
 
             <label>Assunto</label>
-            <select>
+            <select value={assunto} onChange={handleChangeSelect}>
               <option value="Suporte">Suporte</option>
               <option value="Visita Técnica">Visita Técnica</option>
               <option value="Financeiro">Financeiro</option>
