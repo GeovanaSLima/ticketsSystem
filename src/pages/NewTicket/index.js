@@ -6,8 +6,9 @@ import './newTicket.css';
 import { FiPlusCircle } from 'react-icons/fi';
 import { AuthContext } from '../../contexts/auth';
 import { useContext, useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
+import { toast } from 'react-toastify';
 
 
 const listRef = collection(db, "customers");
@@ -38,7 +39,7 @@ export default function NewTicket() {
         })
 
         if (snapshot.docs.size === 0) {
-          console.log("NENHUMA EMPRESA ENCONTRADA");
+          toast.error("NENHUMA EMPRESA ENCONTRADA")
           setCustomers([ { id: "'", nomeFantasia: "Freela" } ])
           setLoadingCustomer(false);
           return;
@@ -47,7 +48,6 @@ export default function NewTicket() {
         setCustomers(lista);
         setLoadingCustomer(false);
 
-        console.log(lista);
       })
       .catch((error) => {
         console.log("Erro ao buscar os clientes", error)
@@ -71,6 +71,29 @@ export default function NewTicket() {
     setCustomerSelected(e.target.value);
   }
 
+  async function handleRegister(e) {
+    e.preventDefault();
+
+    await addDoc(collection(db, "tickets"), {
+      created: new Date(),
+      customer: customers[customerSelected].nomeFantasia,
+      customerId: customers[customerSelected].id,
+      assunto: assunto,
+      message: mensagem,
+      status: status,
+      userId: user.uid,
+    })
+    .then(() => {
+      toast.success("Chamado Registrado")
+      setMensagem('')
+      setCustomerSelected(0)
+    })
+    .catch((error) => {
+      console.log(error);
+      toast.error("Erro ao registrar. Tente novamente")
+    })
+  }
+
 
   return(
     <div>
@@ -82,7 +105,7 @@ export default function NewTicket() {
         </Title>
 
         <div className="container">
-          <form action="" className="form-profile">
+          <form onSubmit={handleRegister} className="form-profile">
             
             <label>Clientes</label>
             {
