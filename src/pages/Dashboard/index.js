@@ -2,12 +2,14 @@ import './dashboard.css';
 import Sidebar from "../../components/Sidebar";
 import Title from "../../components/Title";
 
-import { useContext, useEffect, useState } from "react"
-import { AuthContext } from "../../contexts/auth"
-import { FiEdit2, FiMessageSquare, FiPlus, FiSearch } from 'react-icons/fi';
+import { format } from "date-fns";
 import { Link } from 'react-router-dom';
+import { useContext, useEffect, useState } from "react";
+import { FiEdit2, FiMessageSquare, FiPlus, FiSearch } from 'react-icons/fi';
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+
 import { db } from '../../services/firebaseConnection';
+import { AuthContext } from "../../contexts/auth";
 
 const listRef = collection(db, "tickets");
 
@@ -24,6 +26,8 @@ export default function Dashboard() {
       const ticketsQuery = query(listRef, orderBy('created', 'desc'), limit(5));
 
       const querySnapshot = await getDocs(ticketsQuery)
+      setTickets([]);
+
       await updateState(querySnapshot)
 
       setLoading(false);
@@ -48,6 +52,7 @@ export default function Dashboard() {
           customer: doc.data().customer,
           customerId: doc.data().customerId,
           created: doc.data().created,
+          createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy'),
           status: doc.data().status,
           message: doc.data().message 
         })
@@ -59,6 +64,23 @@ export default function Dashboard() {
     }
   }
 
+  if (loading) {
+    return(
+      <div>
+        <Sidebar/>
+
+        <div className="content">
+          <Title titleName="Tickets">
+            <FiMessageSquare size={30} />
+          </Title>
+
+          <div className="container dashboard">
+            <span>Buscando Chamados...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return(
     <div>
@@ -99,22 +121,26 @@ export default function Dashboard() {
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td data-label="Cliente">Empresa Teste</td>
-                    <td data-label="Assunto">Suporte</td>
-                    <td data-label="Status">
-                      <span className="badge" style={{ backgroundColor: '#999' }}>Em Aberto</span>
-                    </td>
-                    <td data-label="Cadastrado">12/11/2024</td>
-                    <td data-label="#">
-                      <button className="action" style={{ backgroundColor: "#3583F6" }}>
-                        <FiSearch color="#FFF" size={17} />
-                      </button>
-                      <button className="action" style={{ backgroundColor: "#F6A935" }}>
-                        <FiEdit2 color="#FFF" size={17} />
-                      </button>
-                    </td>
-                  </tr>
+                  {tickets.map((item, index) => {
+                    return(
+                      <tr key={index}>
+                        <td data-label="Cliente">{item.customer}</td>
+                        <td data-label="Assunto">{item.assunto}</td>
+                        <td data-label="Status">
+                          <span className="badge" style={{ backgroundColor: '#999' }}>{item.status}</span>
+                        </td>
+                        <td data-label="Cadastrado">{item.createdFormat}</td>
+                        <td data-label="#">
+                          <button className="action" style={{ backgroundColor: "#3583F6" }}>
+                            <FiSearch color="#FFF" size={17} />
+                          </button>
+                          <button className="action" style={{ backgroundColor: "#F6A935" }}>
+                            <FiEdit2 color="#FFF" size={17} />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
 
