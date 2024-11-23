@@ -68,10 +68,10 @@ table th {
 
 table td .action {
   border: 0;
-  padding: 5px;
+  padding: 7px 10px;
   border-radius: 4px;
   display: inline-block;
-  margin-right: 3px;
+  margin-right: 6px;
 }
 
 table td .action svg {

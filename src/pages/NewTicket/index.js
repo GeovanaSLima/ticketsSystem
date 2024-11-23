@@ -3,12 +3,13 @@ import Sidebar from '../../components/Sidebar';
 
 import './newTicket.css';
 
-import { FiPlusCircle } from 'react-icons/fi';
+import { FiEdit2, FiPlusCircle } from 'react-icons/fi';
 import { AuthContext } from '../../contexts/auth';
 import { useContext, useEffect, useState } from 'react';
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 const listRef = collection(db, "customers");
@@ -16,10 +17,13 @@ const listRef = collection(db, "customers");
 
 export default function NewTicket() {
   const { user } = useContext(AuthContext);
+  const { id } = useParams();
+  const navigate = useNavigate("/dashboard");
   
   const [customers, setCustomers] = useState([]);
   const [customerSelected, setCustomerSelected] = useState(0);
   const [loadCustomer, setLoadingCustomer] = useState(true);
+  const [idCustomer, setIdCustomer] = useState(false);
 
   const [mensagem, setMensagem] = useState("");
   const [assunto, setAssunto] = useState("Suporte");
@@ -48,6 +52,10 @@ export default function NewTicket() {
         setCustomers(lista);
         setLoadingCustomer(false);
 
+        if (id) {
+          loadIdInfo(lista);
+        }
+
       })
       .catch((error) => {
         console.log("Erro ao buscar os clientes", error)
@@ -57,7 +65,7 @@ export default function NewTicket() {
     }
 
     loadCustomer();
-  }, [])
+  }, [id])
 
   function handleOptionChange(e) {
     setStatus(e.target.value);
@@ -71,8 +79,31 @@ export default function NewTicket() {
     setCustomerSelected(e.target.value);
   }
 
-  async function handleRegister(e) {
+  async function handleSaving(e) {
     e.preventDefault();
+
+    if (idCustomer) {
+      const docRef = doc(db, "tickets", id)
+      await updateDoc(docRef, {
+        customer: customers[customerSelected].nomeFantasia,
+        customerId: customers[customerSelected].id,
+        assunto: assunto,
+        message: mensagem,
+        status: status,
+        userId: user.uid,
+      })
+      .then(() => {
+        toast.info("Chamado atualizado com sucesso!")
+        setCustomerSelected(0);
+        setMensagem('');
+        navigate()
+      })
+      .catch(() => {
+        toast.error("Erro ao atualizar esse chamado!")
+      })
+
+      return;
+    }
 
     await addDoc(collection(db, "tickets"), {
       created: new Date(),
@@ -84,13 +115,34 @@ export default function NewTicket() {
       userId: user.uid,
     })
     .then(() => {
-      toast.success("Chamado Registrado")
-      setMensagem('')
-      setCustomerSelected(0)
+      toast.success("Chamado Registrado");
+      setMensagem('');
+      setCustomerSelected(0);
+      navigate()
     })
     .catch((error) => {
       console.log(error);
       toast.error("Erro ao registrar. Tente novamente")
+    })
+  }
+
+  async function loadIdInfo(lista) {
+    const docRef = doc(db, "tickets", id);
+    await getDoc(docRef)
+    .then((snapshot) => {
+      setAssunto(snapshot.data().assunto);
+      setStatus(snapshot.data().status);
+      setMensagem(snapshot.data().message);
+
+      let index = lista.findIndex(item => item.id === snapshot.data().customerId)
+      setCustomerSelected(index);
+      setIdCustomer(true);
+
+    })
+    .catch((error) => {
+      console.log(error);
+      toast.error("Chamado não encontrado");
+      navigate();
     })
   }
 
@@ -100,12 +152,16 @@ export default function NewTicket() {
       <Sidebar/>
 
       <div className="content">
-        <Title titleName="Novo Chamado">
-          <FiPlusCircle size={30}/>
+        <Title titleName={ idCustomer ? "Editar Chamado" : "Novo Chamado" }>
+          {idCustomer ? (
+            <FiEdit2 size={30} />
+          ) : (
+            <FiPlusCircle size={30}/>
+          )}
         </Title>
 
         <div className="container">
-          <form onSubmit={handleRegister} className="form-profile">
+          <form onSubmit={handleSaving} className="form-profile">
             
             <label>Clientes</label>
             {
@@ -148,7 +204,13 @@ export default function NewTicket() {
             <label>Mensagem</label>
             <textarea type="text" value={mensagem} onChange={ (e) => setMensagem(e.target.value)} placeholder="Descreva seu problema"></textarea>
 
-            <button type="submit">Criar Chamado</button>
+            <button type="submit">
+              {idCustomer ? (
+                "Salvar"
+              ) : (
+                "Criar Chamado"
+              )}
+            </button>
 
           </form>
         </div>
