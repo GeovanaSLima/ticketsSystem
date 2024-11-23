@@ -84,6 +84,24 @@ table td .badge {
   color: #FFF;
 }
 
+.title-more {
+  margin-top: 20px;
+}
+
+.btn-more {
+  margin: 1.5em 0;
+  padding: 0.5em 1em;
+  background-color: #181C2E;
+  border: 0;
+  border-radius: 5px;
+  font-size: 1em;
+  color: #FFF;
+}
+
+.badge {
+  padding: 0.4em 0.8em !important; 
+}
+
 @media screen and (max-width: 600px) {
   table {
     border: 0;

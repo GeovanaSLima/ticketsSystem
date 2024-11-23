@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Link } from 'react-router-dom';
 import { useContext, useEffect, useState } from "react";
 import { FiEdit2, FiMessageSquare, FiPlus, FiSearch } from 'react-icons/fi';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query, startAfter } from 'firebase/firestore';
 
 import { db } from '../../services/firebaseConnection';
 import { AuthContext } from "../../contexts/auth";
@@ -17,6 +17,9 @@ export default function Dashboard() {
   const { logOut } = useContext(AuthContext);
 
   const [tickets, setTickets] = useState([]);
+  const [lastDoc, setLastDoc] = useState();
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
 
@@ -58,10 +61,17 @@ export default function Dashboard() {
         })
       })
 
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length -1] 
+      
       setTickets(tickets => [...tickets, ...lista])
+      setLastDoc(lastDoc);
+
     } else {
       setIsEmpty(true);
     }
+
+    setLoadingMore(false);
+
   }
 
   if (loading) {
@@ -80,6 +90,15 @@ export default function Dashboard() {
         </div>
       </div>
     )
+  }
+
+  async function handleMore() {
+    setLoadingMore(true);
+
+    const ticketsQuery = query(listRef, orderBy('created', 'desc'), startAfter(lastDoc), limit(5));
+    const querySnapshot = await getDocs(ticketsQuery);
+    await updateState(querySnapshot);
+
   }
 
   return(
@@ -127,7 +146,9 @@ export default function Dashboard() {
                         <td data-label="Cliente">{item.customer}</td>
                         <td data-label="Assunto">{item.assunto}</td>
                         <td data-label="Status">
-                          <span className="badge" style={{ backgroundColor: '#999' }}>{item.status}</span>
+                          <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5CB85C' : '#999'}}>
+                            {item.status}
+                          </span>
                         </td>
                         <td data-label="Cadastrado">{item.createdFormat}</td>
                         <td data-label="#">
@@ -143,6 +164,9 @@ export default function Dashboard() {
                   })}
                 </tbody>
               </table>
+
+              {loadingMore && <h3 className="title-more">Buscando mais chamados...</h3>}
+              {!loadingMore && !isEmpty && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
 
             </>
           )}
