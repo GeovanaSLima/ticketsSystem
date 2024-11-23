@@ -10,6 +10,7 @@ import { collection, getDocs, limit, orderBy, query, startAfter } from 'firebase
 
 import { db } from '../../services/firebaseConnection';
 import { AuthContext } from "../../contexts/auth";
+import Modal from '../../components/Modal';
 
 const listRef = collection(db, "tickets");
 
@@ -173,6 +174,9 @@ export default function Dashboard() {
 
         </>
       </div>
+
+      <Modal/>
+      
     </div>
   )
 }
