@@ -23,6 +23,9 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
+  
+  const [showModal, setShowModal] = useState(false);
+  const [details, setDetails] = useState();
 
   useEffect(() => {
 
@@ -102,6 +105,11 @@ export default function Dashboard() {
 
   }
 
+  function toggleModal(item) {
+    setShowModal(!showModal)
+    setDetails(item)
+  }
+
   return(
     <div>
 
@@ -147,13 +155,13 @@ export default function Dashboard() {
                         <td data-label="Cliente">{item.customer}</td>
                         <td data-label="Assunto">{item.assunto}</td>
                         <td data-label="Status">
-                          <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5CB85C' : '#999'}}>
+                          <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? "#999": "#5CB85C" }}>
                             {item.status}
                           </span>
                         </td>
                         <td data-label="Cadastrado">{item.createdFormat}</td>
                         <td data-label="#">
-                          <Link className="action" style={{ backgroundColor: "#3583F6" }}>
+                          <Link className="action" style={{ backgroundColor: "#3583F6" }} onClick={ () => toggleModal(item) }>
                             <FiSearch color="#FFF" size={17} />
                           </Link>
                           <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: "#F6A935" }}>
@@ -175,7 +183,7 @@ export default function Dashboard() {
         </>
       </div>
 
-      <Modal/>
+      {showModal && (<Modal content={details} closeModal={ () => setShowModal(!showModal) } />)}
       
     </div>
   )

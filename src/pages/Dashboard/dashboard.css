@@ -1,7 +1,7 @@
 .new {
   float: right;
   margin-bottom: 1.5em;
-  background-color: #83BF02;
+  background-color: #5CB85C;
   padding: 0.5em;
   border-radius: 5px;
   display: flex;
@@ -18,8 +18,8 @@
 }
 
 .new:hover {
-  background-color: #5FD204;
-  transform: scale(1.02);
+  background-color: #55a755;
+  transform: scale(1.01);
 }
 
 .dashboard {

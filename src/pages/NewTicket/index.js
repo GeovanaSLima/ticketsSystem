@@ -18,7 +18,7 @@ const listRef = collection(db, "customers");
 export default function NewTicket() {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const navigate = useNavigate("/dashboard");
+  const navigate = useNavigate();
   
   const [customers, setCustomers] = useState([]);
   const [customerSelected, setCustomerSelected] = useState(0);
@@ -96,7 +96,7 @@ export default function NewTicket() {
         toast.info("Chamado atualizado com sucesso!")
         setCustomerSelected(0);
         setMensagem('');
-        navigate()
+        navigate("/dashboard")
       })
       .catch(() => {
         toast.error("Erro ao atualizar esse chamado!")
@@ -118,7 +118,7 @@ export default function NewTicket() {
       toast.success("Chamado Registrado");
       setMensagem('');
       setCustomerSelected(0);
-      navigate()
+      navigate("/dashboard")
     })
     .catch((error) => {
       console.log(error);
@@ -142,7 +142,7 @@ export default function NewTicket() {
     .catch((error) => {
       console.log(error);
       toast.error("Chamado não encontrado");
-      navigate();
+      navigate("/dashboard");
     })
   }
 

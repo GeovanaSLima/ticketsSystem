@@ -2,11 +2,11 @@ import './modal.css';
 
 import { FiChevronLeft } from 'react-icons/fi';
 
-export default function Modal() {
+export default function Modal({ content, closeModal }) {
   return(
     <div className="modal">
       <div className="container">
-        <button className="close">
+        <button className="close" onClick={ closeModal }>
           <FiChevronLeft size={20} color="#FFF"/>
         </button>
 
@@ -15,31 +15,36 @@ export default function Modal() {
 
           <div className="row">
             <span>
-              Cliente: <i>Mercado</i>
+              Cliente: <i>{content.customer}</i>
             </span>
           </div>
           
           <div className="row">
             <span>
-              Assunto: <i>suporte</i>
+              Assunto: <i>{content.assunto}</i>
             </span>
             <span>
-              Cadastrado Em: <i>22/11/2024</i>
+              Cadastrado Em: <i>{content.createdFormat}</i>
             </span>
           </div>
           
           <div className="row">
             <span>
-              Status: <i>Aberto</i>
+              Status: 
+              <i className="status-badge" style={{ color: "#FFF", backgroundColor: content.status === 'Aberto' ? "#999": "#5CB85C" }} >
+                {content.status}
+              </i>
             </span>
           </div>
 
-          <>
-            <h3 className="modal-msg-title">Mensagem</h3>
-            <p>
-              bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla 
-            </p>
-          </>
+            {content.message !== '' && (
+              <>
+                <h3 className="modal-msg-title">Mensagem</h3>
+                <p>
+                  {content.message}
+                </p>
+              </>
+            )}
 
         </main>
       </div>
